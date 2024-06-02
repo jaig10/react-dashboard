@@ -1,38 +1,43 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
+import React, { useEffect } from "react";
+import { Box, Button, CircularProgress, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getSellers } from "../../redux/sellerRedux/sellerApi"; // Adjust the path as needed
 
 const SellerProducts = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const dispatch = useDispatch();
+  const sellers = useSelector((state) => state.seller?.sellers || []);
+  const isFetching = useSelector((state) => state.seller?.isFetching || false);
+  const error = useSelector((state) => state.seller?.error || false);
+
+  useEffect(() => {
+    getSellers(dispatch);
+  }, [dispatch]);
+
+
   const sellerColumns = [
     { field: "id", headerName: "ID" },
     { field: "name", headerName: "Name", flex: 1, cellClassName: "name-column--cell" },
     { field: "email", headerName: "Email", flex: 1 },
-    { field: "phone", headerName: "Phone", flex: 1 }, {
+    { field: "phone", headerName: "Phone", flex: 1 },
+    {
       field: "action",
       headerName: "Action",
       width: 150,
-      renderCell: (params) => {
-        return (
-          <>
-            <Link to={"/user/" + params.row.id}>
-            <Button variant="contained" size="small" color="success" sx={{color:"white", fontWeight:"600", }}>Edit</Button>
-            </Link>
-            <Button variant="contained" size="small" color="error" sx={{color:"white", fontWeight:"600", marginLeft:"10px"}}>Delete</Button>
-            
-          </>
-        );
-      },
+      renderCell: (params) => (
+        <>
+          <Link to={"/seller/" + params.row.id}>
+            <Button variant="contained" size="small" color="success" sx={{ color: "white", fontWeight: "600" }}>Edit</Button>
+          </Link>
+          <Button variant="contained" size="small" color="error" sx={{ color: "white", fontWeight: "600", marginLeft: "10px" }}>Delete</Button>
+        </>
+      ),
     },
-  ];
-  const sampleSellers = [
-    { id: 1, name: "Seller 1", email: "seller1@example.com", phone: "123-456-7890" },
-    { id: 2, name: "Seller 2", email: "seller2@example.com", phone: "987-654-3210" },
-    { id: 3, name: "Seller 3", email: "seller3@example.com", phone: "555-555-5555" },
-    // Add more sample seller data as needed
   ];
 
   return (
@@ -67,7 +72,24 @@ const SellerProducts = () => {
           },
         }}
       >
-        <DataGrid checkboxSelection rows={sampleSellers} columns={sellerColumns} />
+        {isFetching ? (
+          <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Typography variant="h6" color="error">Failed to fetch sellers</Typography>
+        ) : (
+          <DataGrid
+            checkboxSelection
+            rows={sellers.map((seller) => ({
+              id: seller._id, // Adjust this according to your seller's data structure
+              name: seller.firstName,
+              email: seller.email,
+              phone: seller.phone,
+            }))}
+            columns={sellerColumns}
+          />
+        )}
       </Box>
     </Box>
   );

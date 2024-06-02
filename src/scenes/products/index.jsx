@@ -1,12 +1,24 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
+import React, { useEffect } from "react";
+import { Box, Button, CircularProgress, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
-import ab from "../../images/jeans.png";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getProducts } from "../../redux/productRedux/productApi"; // Adjust the path as needed
+import ab from "../../images/jeans.png"; // Sample image for products
+
 const Products = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const dispatch = useDispatch();
+  const products = useSelector((state) => state.product?.products || []);
+  const isFetching = useSelector((state) => state.product?.isFetching || false);
+  const error = useSelector((state) => state.product?.error || false);
+
+  useEffect(() => {
+    getProducts(dispatch);
+  }, [dispatch]);
 
   const productColumns = [
     {
@@ -17,7 +29,7 @@ const Products = () => {
       renderCell: ({ row }) => (
         <Box display="flex" alignItems="center">
           <img
-            src={row.image}
+            src={row.image || ab} // Fallback to sample image if image URL is not provided
             style={{ width: 30, height: 30, borderRadius: "50%", marginRight: 10 }}
           />
           <Typography variant="body2">{row.title}</Typography>
@@ -32,32 +44,19 @@ const Products = () => {
       field: "action",
       headerName: "Action",
       width: 200,
-      renderCell: (params) => {
-        return (
-          <Box >
-            <Link to={"/product/" + params.row.id}>
-            <Button variant="contained" size="small" color="success" sx={{color:"white", fontWeight:"600", }}>Edit</Button>
-            </Link>
-            <Button variant="contained" size="small" color="error" sx={{color:"white", fontWeight:"600", marginLeft:"10px"}}>Delete</Button>
-            
-            {/* <DeleteOutline
-              className="productListDelete"
-            /> */}
-          </Box>
-        );
-      },
+      renderCell: (params) => (
+        <Box>
+          <Link to={"/product/" + params.row.id}>
+            <Button variant="contained" size="small" color="success" sx={{ color: "white", fontWeight: "600" }}>Edit</Button>
+          </Link>
+          <Button variant="contained" size="small" color="error" sx={{ color: "white", fontWeight: "600", marginLeft: "10px" }}>Delete</Button>
+        </Box>
+      ),
     },
-  ];
-
-  const sampleProducts = [
-    { id: 1, title: "Product A", description: "Description of Product A", image: ab, quantity: 100, brand: "Brand X", category: "Category 1" },
-    { id: 2, title: "Product B", description: "Description of Product B", image: ab, quantity: 50, brand: "Brand Y", category: "Category 2" },
-    { id: 3, title: "Product C", description: "Description of Product C", image: ab, quantity: 200, brand: "Brand Z", category: "Category 3" },
   ];
 
   return (
     <Box m="20px">
-      {/* <img src={ab}/> */}
       <Header title="Products" subtitle="List of all Products" />
       <Box
         m="40px 0 0 0"
@@ -69,10 +68,6 @@ const Products = () => {
           "& .MuiDataGrid-cell": {
             borderBottom: "none",
           },
-          // Remove unnecessary color styling for "title-column--cell"
-          // "& .name-column--cell": {
-          //   color: colors.greenAccent[300],
-          // },
           "& .MuiDataGrid-columnHeaders": {
             backgroundColor: colors.blueAccent[700],
             borderBottom: "none",
@@ -89,7 +84,27 @@ const Products = () => {
           },
         }}
       >
-        <DataGrid checkboxSelection rows={sampleProducts} columns={productColumns} />
+        {isFetching ? (
+          <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Typography variant="h6" color="error">Failed to fetch products</Typography>
+        ) : (
+          <DataGrid
+            checkboxSelection
+            rows={products.map((product) => ({
+              id: product._id, // Adjust this according to your product's data structure
+              title: product.title,
+              description: product.desc,
+              image: product.image,
+              quantity: product.quantity,
+              brand: product.brand,
+              category: product.categories,
+            }))}
+            columns={productColumns}
+          />
+        )}
       </Box>
     </Box>
   );
