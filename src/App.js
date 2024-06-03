@@ -36,7 +36,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Routes>
-          <Route element={<MainLayout />}>
+        <Route element={<MainLayout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/users" element={<Users />} />
             <Route path="/products" element={<Products />} />
@@ -45,14 +45,19 @@ function App() {
             <Route path="/newsletters" element={<Newsletters />} />
             <Route path="/coupons" element={<Coupons />} />
             <Route path="/banners" element={<Banners />} />
+            
+            {/* Specific routes for entities */}
             <Route path="/product/:id" element={<Product />} />
             <Route path="/seller/:id" element={<Seller />} />
             <Route path="/order/:id" element={<Order />} />
             <Route path="/user/:id" element={<User />} />
             <Route path="/banner/:id" element={<Banner />} />
+        
+            {/* Dynamic route for creating new entities */}
+            <Route path="/new/:entity" element={<Form />} />
+        
             <Route path="/contacts" element={<Contacts />} />
             <Route path="/invoices" element={<Invoices />} />
-            <Route path="/form" element={<Form />} />
             <Route path="/bar" element={<Bar />} />
             <Route path="/pie" element={<Pie />} />
             <Route path="/line" element={<Line />} />

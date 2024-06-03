@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Box, Button, CircularProgress, Typography, useTheme } from "@mui/material";
+import { Box, Button, CircularProgress, Skeleton, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
@@ -28,9 +28,10 @@ const Products = () => {
       minWidth: 200, // Set minimum width for combined title and image
       renderCell: ({ row }) => (
         <Box display="flex" alignItems="center">
-          <img
+          <image
             src={row.image || ab} // Fallback to sample image if image URL is not provided
             style={{ width: 30, height: 30, borderRadius: "50%", marginRight: 10 }}
+            alt="Product Image"
           />
           <Typography variant="body2">{row.title}</Typography>
         </Box>
@@ -54,6 +55,19 @@ const Products = () => {
       ),
     },
   ];
+
+  const renderSkeletons = (count) => {
+    return Array.from(new Array(count)).map((_, index) => (
+      <Box key={index} display="flex" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+        <Skeleton variant="rectangular" width={30} height={30} sx={{ borderRadius: "50%", marginRight: 2 }} />
+        <Skeleton variant="text" width="20%" />
+        <Skeleton variant="text" width="30%" />
+        <Skeleton variant="text" width="15%" />
+        <Skeleton variant="text" width="15%" />
+        <Skeleton variant="rectangular" width={100} height={30} />
+      </Box>
+    ));
+  };
 
   return (
     <Box m="20px">
@@ -85,8 +99,8 @@ const Products = () => {
         }}
       >
         {isFetching ? (
-          <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-            <CircularProgress />
+          <Box m="20px">
+            {renderSkeletons(20)} {/* Adjust the number of skeleton rows as needed */}
           </Box>
         ) : error ? (
           <Typography variant="h6" color="error">Failed to fetch products</Typography>

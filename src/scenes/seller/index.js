@@ -3,6 +3,8 @@ import { useDispatch } from "react-redux";
 import {
   Box,
   Button,
+  Grid,
+  Paper,
   TextField,
   Typography,
   useTheme,
@@ -14,7 +16,7 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
 import { tokens } from "../../theme";
 import { getSellerById, updateSeller } from "../../redux/sellerRedux/sellerApi";
-import { uploadImageToFirebase } from "../../firebaseUtils";
+import { uploadImageToFirebase } from "../../utils/firebaseUtils";
 
 const Seller = () => {
   const location = useLocation();
@@ -134,7 +136,8 @@ const Seller = () => {
 
   return (
     <Box m="20px">
-      <Header title="Seller" subtitle="Seller Details" />
+    <Header title="Create New Seller" subtitle="Fill in the details to create a new seller" />
+    <Paper sx={{ p: 3, backgroundColor: colors.primary[400] }}>
       <Formik
         onSubmit={handleFormSubmit}
         initialValues={initialValues}
@@ -150,189 +153,173 @@ const Seller = () => {
           setFieldValue,
         }) => (
           <form onSubmit={handleSubmit}>
-            <Box>
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="First Name"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.firstName}
-                name="firstName"
-                error={!!touched.firstName && !!errors.firstName}
-                helperText={touched.firstName && errors.firstName}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Last Name"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.lastName}
-                name="lastName"
-                error={!!touched.lastName && !!errors.lastName}
-                helperText={touched.lastName && errors.lastName}
-                sx={{ margin: "1.5rem 0 2rem 0" }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="email"
-                label="Email"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.email}
-                name="email"
-                error={!!touched.email && !!errors.email}
-                helperText={touched.email && errors.email}
-                sx={{ margin: "1.5rem 0 2rem 0" }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Phone"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.phone}
-                name="phone"
-                error={!!touched.phone && !!errors.phone}
-                helperText={touched.phone && errors.phone}
-                sx={{ margin: "1.5rem 0 2rem 0" }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="PAN"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.pan}
-                name="pan"
-                error={!!touched.pan && !!errors.pan}
-                helperText={touched.pan && errors.pan}
-                sx={{ margin: "1.5rem 0 2rem 0" }}
-              />
-              <Box sx={{ marginTop: "2rem" }}>
-                <Typography
-                  variant="h3"
-                  color={colors.grey[100]}
-                  fontWeight="bold"
-                  sx={{ m: "0 0 5px 0" }}
-                >
-                  Beneficiary
-                </Typography>
-                <Box sx={{ marginTop: "20px" }}>
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    type="text"
-                    label="Beneficiary Name"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.beneficiary.beneficiaryName}
-                    name="beneficiary.beneficiaryName"
-                    error={
-                      !!touched.beneficiary?.beneficiaryName &&
-                      !!errors.beneficiary?.beneficiaryName
-                    }
-                    helperText={
-                      touched.beneficiary?.beneficiaryName &&
-                      errors.beneficiary?.beneficiaryName
-                    }
-                  />
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    type="text"
-                    label="Account Number"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.beneficiary.accountNumber}
-                    name="beneficiary.accountNumber"
-                    error={
-                      !!touched.beneficiary?.accountNumber &&
-                      !!errors.beneficiary?.accountNumber
-                    }
-                    helperText={
-                      touched.beneficiary?.accountNumber &&
-                      errors.beneficiary?.accountNumber
-                    }
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <Typography variant="h5" sx={{ mb: 2 }}>Seller Details</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  label="First Name"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  value={values.firstName}
+                  name="firstName"
+                  error={!!touched.firstName && !!errors.firstName}
+                  helperText={touched.firstName && errors.firstName}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  label="Last Name"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  value={values.lastName}
+                  name="lastName"
+                  error={!!touched.lastName && !!errors.lastName}
+                  helperText={touched.lastName && errors.lastName}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  label="Email"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  value={values.email}
+                  name="email"
+                  error={!!touched.email && !!errors.email}
+                  helperText={touched.email && errors.email}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  label="Phone"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  value={values.phone}
+                  name="phone"
+                  error={!!touched.phone && !!errors.phone}
+                  helperText={touched.phone && errors.phone}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  label="PAN"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  value={values.pan}
+                  name="pan"
+                  error={!!touched.pan && !!errors.pan}
+                  helperText={touched.pan && errors.pan}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="h5" sx={{ mt: 3, mb: 2 }}>Beneficiary</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  label="Beneficiary Name"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  value={values.beneficiaryName}
+                  name="beneficiaryName"
+                  error={!!touched.beneficiaryName && !!errors.beneficiaryName}
+                  helperText={touched.beneficiaryName && errors.beneficiaryName}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  label="Account Number"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  value={values.accountNumber}
+                  name="accountNumber"
+                  error={!!touched.accountNumber && !!errors.accountNumber}
+                  helperText={touched.accountNumber && errors.accountNumber}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  label="IFSC"
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  value={values.ifsc}
+                  name="ifsc"
+                  error={!!touched.ifsc && !!errors.ifsc}
+                  helperText={touched.ifsc && errors.ifsc}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="h5" sx={{ mt: 3, mb: 2 }}>Documents</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                  <Button
+                    variant="contained"
+                    component="label"
                     sx={{ margin: "1.5rem 0 2rem 0" }}
-                  />
-                  <TextField
-                    fullWidth
-                    variant="filled"
-                    type="text"
-                    label="IFSC"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.beneficiary.ifsc}
-                    name="beneficiary.ifsc"
-                    error={
-                      !!touched.beneficiary?.ifsc && !!errors.beneficiary?.ifsc
-                    }
-                    helperText={
-                      touched.beneficiary?.ifsc && errors.beneficiary?.ifsc
-                    }
+                  >
+                    Upload PAN Image
+                    <input
+                      type="file"
+                      hidden
+                      onChange={(event) => {
+                        setPanImage(event.currentTarget.files[0]);
+                        setFieldValue("pan_image", event.currentTarget.files[0]);
+                      }}
+                    />
+                  </Button>
+                  {panImage && <Typography>{panImage.name}</Typography>}
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Button
+                    variant="contained"
+                    component="label"
                     sx={{ margin: "1.5rem 0 2rem 0" }}
-                  />
-                </Box>
-              </Box>
-              <Box sx={{ marginTop: "2rem" }}>
-                <Typography
-                  variant="h3"
-                  color={colors.grey[100]}
-                  fontWeight="bold"
-                  sx={{ m: "0 0 5px 0" }}
-                >
-                  Documents
-                </Typography>
+                  >
+                    Upload Aadhar Image
+                    <input
+                      type="file"
+                      hidden
+                      onChange={(event) => {
+                        setAadharImage(event.currentTarget.files[0]);
+                        setFieldValue("aadhar_image", event.currentTarget.files[0]);
+                      }}
+                    />
+                  </Button>
+                  {aadharImage && <Typography>{aadharImage.name}</Typography>}
+                </Grid>
+              <Grid item xs={12}>
                 <Button
+                  type="submit"
                   variant="contained"
-                  component="label"
-                  sx={{ margin: "1.5rem 0 2rem 0" }}
+                  color="primary"
+                  fullWidth
+                  sx={{ mt: 3 }}
                 >
-                  Upload PAN Image
-                  <input
-                    type="file"
-                    hidden
-                    onChange={(event) => {
-                      setPanImage(event.currentTarget.files[0]);
-                      setFieldValue("pan_image", event.currentTarget.files[0]);
-                    }}
-                  />
+                  Submit
                 </Button>
-                {panImage && <Typography>{panImage.name}</Typography>}
-                <Button
-                  variant="contained"
-                  component="label"
-                  sx={{ margin: "1.5rem 0 2rem 0" }}
-                >
-                  Upload Aadhar Image
-                  <input
-                    type="file"
-                    hidden
-                    onChange={(event) => {
-                      setAadharImage(event.currentTarget.files[0]);
-                      setFieldValue("aadhar_image", event.currentTarget.files[0]);
-                    }}
-                  />
-                </Button>
-                {aadharImage && <Typography>{aadharImage.name}</Typography>}
-              </Box>
-              <Box display="flex" justifyContent="end" mt="20px">
-                <Button type="submit" color="secondary" variant="contained">
-                  {loading ? `Uploading... ${progress}%` : "Submit"}
-                </Button>
-              </Box>
-            </Box>
+              </Grid>
+            </Grid>
           </form>
         )}
       </Formik>
-    </Box>
+    </Paper>
+  </Box>
   );
 };
 

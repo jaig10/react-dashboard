@@ -17,7 +17,6 @@ import {
 export const getProducts = async (dispatch) => {
     dispatch(getProductStart());
     try {
-      console.log("hello");
       const res = await userRequest.get("/products");
       console.log(res.data);
       dispatch(getProductSuccess(res.data));

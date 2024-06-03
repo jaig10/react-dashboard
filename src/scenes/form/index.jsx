@@ -1,129 +1,209 @@
-import { Box, Button, TextField } from "@mui/material";
-import { Formik } from "formik";
+import { Box, Button, TextField, Typography, Grid, Paper, useTheme, CircularProgress, IconButton, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import { Formik, FieldArray } from 'formik';
 import * as yup from "yup";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import Header from "../../components/Header";
+import schemas from "../../helpers/schemas";
+import { uploadImageToFirebase } from "../../utils/firebaseUtils";
+import { tokens } from "../../theme";
+import { useParams } from "react-router-dom";
+import { handleApiCall } from "../../redux/apiHandler";
+import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Form = () => {
-  const isNonMobile = useMediaQuery("(min-width:600px)");
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const { entity } = useParams();
+  const schema = schemas[entity];
+  const dispatch = useDispatch();
+  const { isFetching } = useSelector((state) => state[entity]);
 
-  const handleFormSubmit = (values) => {
-    console.log(values);
+  const [uploadedFiles, setUploadedFiles] = useState({});
+
+  if (!schema) {
+    return <Typography variant="h5">Invalid entity</Typography>;
+  }
+
+  const validationSchema = yup.object().shape(
+    schema.fields.reduce((acc, field) => {
+      if (field.validation) {
+        acc[field.name] = field.validation;
+      }
+      return acc;
+    }, {})
+  );
+
+  const initialValues = schema.fields.reduce((acc, field) => {
+    if (field.type === 'array') {
+      acc[field.name] = [];
+    } else {
+      acc[field.name] = field.type === 'file' && field.multiple ? [] : '';
+    }
+    return acc;
+  }, {});
+
+  const handleFormSubmit = async (values) => {
+    const uploadPromises = [];
+    for (const field of schema.fields) {
+      if (field.type === 'file' && field.multiple) {
+        const files = values[field.name];
+        const urls = [];
+        for (const file of files) {
+          const urlPromise = new Promise((resolve, reject) => {
+            uploadImageToFirebase(file, null, resolve, reject);
+          });
+          uploadPromises.push(urlPromise);
+          urls.push(await urlPromise);
+        }
+        values[field.name] = urls;
+      }
+    }
+    await Promise.all(uploadPromises);
+
+    handleApiCall(entity, values, dispatch);
+  };
+
+  const handleFileChange = (event, fieldName, setFieldValue) => {
+    const files = Array.from(event.currentTarget.files);
+    setFieldValue(fieldName, files);
+    setUploadedFiles((prev) => ({
+      ...prev,
+      [fieldName]: files,
+    }));
   };
 
   return (
     <Box m="20px">
-      <Header title="CREATE USER" subtitle="Create a New User Profile" />
-
-      <Formik
-        onSubmit={handleFormSubmit}
-        initialValues={initialValues}
-        validationSchema={checkoutSchema}
-      >
-        {({
-          values,
-          errors,
-          touched,
-          handleBlur,
-          handleChange,
-          handleSubmit,
-        }) => (
-          <form onSubmit={handleSubmit}>
-            <Box
-              display="grid"
-              gap="30px"
-              gridTemplateColumns="repeat(4, minmax(0, 1fr))"
-              sx={{
-                "& > div": { gridColumn: isNonMobile ? undefined : "span 4" },
-              }}
-            >
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="First Name"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.firstName}
-                name="firstName"
-                error={!!touched.firstName && !!errors.firstName}
-                helperText={touched.firstName && errors.firstName}
-                sx={{ gridColumn: "span 2" }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Last Name"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.lastName}
-                name="lastName"
-                error={!!touched.lastName && !!errors.lastName}
-                helperText={touched.lastName && errors.lastName}
-                sx={{ gridColumn: "span 2" }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Email"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.email}
-                name="email"
-                error={!!touched.email && !!errors.email}
-                helperText={touched.email && errors.email}
-                sx={{ gridColumn: "span 4" }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Contact Number"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.contact}
-                name="contact"
-                error={!!touched.contact && !!errors.contact}
-                helperText={touched.contact && errors.contact}
-                sx={{ gridColumn: "span 4" }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Address 1"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.address1}
-                name="address1"
-                error={!!touched.address1 && !!errors.address1}
-                helperText={touched.address1 && errors.address1}
-                sx={{ gridColumn: "span 4" }}
-              />
-              <TextField
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Address 2"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.address2}
-                name="address2"
-                error={!!touched.address2 && !!errors.address2}
-                helperText={touched.address2 && errors.address2}
-                sx={{ gridColumn: "span 4" }}
-              />
-            </Box>
-            <Box display="flex" justifyContent="end" mt="20px">
-              <Button type="submit" color="secondary" variant="contained">
-                Create New User
-              </Button>
-            </Box>
-          </form>
-        )}
-      </Formik>
+      <Typography variant="h4" mb={4}>{schema.title}</Typography>
+      <Typography variant="subtitle1" mb={4}>{schema.subtitle}</Typography>
+      <Paper sx={{ p: 3, backgroundColor: colors.primary[400] }}>
+        <Formik
+          onSubmit={handleFormSubmit}
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+        >
+          {({
+            values,
+            errors,
+            touched,
+            handleBlur,
+            handleChange,
+            handleSubmit,
+            setFieldValue,
+          }) => (
+            <form onSubmit={handleSubmit}>
+              <Grid container spacing={3}>
+                {schema.fields.map((field) => (
+                  <Grid item xs={12} sm={field.grid || 12} key={field.name}>
+                    {field.type === 'file' ? (
+                      <>
+                        <Button
+                          variant="contained"
+                          component="label"
+                          sx={{ margin: "1.5rem 0 2rem 0" }}
+                        >
+                          {field.label}
+                          <input
+                            type="file"
+                            hidden
+                            multiple={field.multiple}
+                            onChange={(event) => handleFileChange(event, field.name, setFieldValue)}
+                          />
+                        </Button>
+                        {uploadedFiles[field.name] && uploadedFiles[field.name].map((file, index) => (
+                          <Typography key={index}>{file.name}</Typography>
+                        ))}
+                      </>
+                    ) : field.type === 'array' ? (
+                      <FieldArray name={field.name}>
+                        {({ push, remove, form }) => (
+                          <Box>
+                            <Typography variant="h5" sx={{ mt: 3, mb: 2 }}>{field.label}</Typography>
+                            {form.values[field.name].map((variant, index) => (
+                              <Grid container spacing={2} key={index}>
+                                {field.fields.map((subField) => (
+                                  <Grid item xs={12} sm={subField.grid || 12} key={subField.name}>
+                                    <TextField
+                                      fullWidth
+                                      variant="outlined"
+                                      label={subField.label}
+                                      type={subField.type}
+                                      onBlur={handleBlur}
+                                      onChange={handleChange}
+                                      value={variant[subField.name]}
+                                      name={`${field.name}[${index}].${subField.name}`}
+                                      error={!!touched[field.name]?.[index]?.[subField.name] && !!errors[field.name]?.[index]?.[subField.name]}
+                                      helperText={touched[field.name]?.[index]?.[subField.name] && errors[field.name]?.[index]?.[subField.name]}
+                                    />
+                                  </Grid>
+                                ))}
+                                <Grid item xs={12} sm={3}>
+                                  <IconButton
+                                    onClick={() => remove(index)}
+                                    color="error"
+                                  >
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </Grid>
+                              </Grid>
+                            ))}
+                            <Button
+                              variant="contained"
+                              color="secondary"
+                              onClick={() => push({ size: "", price: 0, available: 0 })}
+                            >
+                              Add Variant
+                            </Button>
+                          </Box>
+                        )}
+                      </FieldArray>
+                    ) : field.type === 'select' ? (
+                      <FormControl variant="filled" sx={{ m: 1, minWidth: 200 }}>
+                        <InputLabel>{field.label}</InputLabel>
+                        <Select
+                          value={values[field.name]}
+                          onChange={handleChange}
+                          label={field.label}
+                          name={field.name}
+                        >
+                          {field.options.map((option, index) => (
+                            <MenuItem key={index} value={option}>{option}</MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    ) : (
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        label={field.label}
+                        type={field.type}
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        value={values[field.name]}
+                        name={field.name}
+                        error={!!touched[field.name] && !!errors[field.name]}
+                        helperText={touched[field.name] && errors[field.name]}
+                      />
+                    )}
+                  </Grid>
+                ))}
+                <Grid item xs={12}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    sx={{ mt: 3 }}
+                    disabled={isFetching}
+                  >
+                    {isFetching ? <CircularProgress size={24} /> : 'Submit'}
+                  </Button>
+                </Grid>
+              </Grid>
+            </form>
+          )}
+        </Formik>
+      </Paper>
     </Box>
   );
 };
